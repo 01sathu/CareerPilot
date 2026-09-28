@@ -1,0 +1,40 @@
+{
+  "name": "careerpilot-backend",
+  "version": "1.0.0",
+  "description": "Backend API for CareerPilot — AI-Powered Job Search & Career Management Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:gemini": "node scripts/test-real-gemini.js"
+  },
+  "keywords": [
+    "careerpilot",
+    "job-tracker",
+    "express",
+    "mongoose"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "multer": "^2.4.0",
+    "pdf-parse": "^2.4.5",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0",
+    "vitest": "^3.0.4"
+  }
+}
