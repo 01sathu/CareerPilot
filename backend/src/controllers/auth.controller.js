@@ -1,6 +1,7 @@
 const authService = require('../services/auth.service');
 const { getRefreshTokenCookieOptions, getClearRefreshTokenCookieOptions } = require('../services/token.service');
 const { success, created } = require('../utils/apiResponse');
+const AppError = require('../utils/appError');
 
 /**
  * Register a new user
@@ -38,11 +39,17 @@ const login = async (req, res, next) => {
 };
 
 /**
- * Refresh access token using HttpOnly cookie (FR-010, FR-012)
+ * Refresh access token using HttpOnly cookie (FR-010, FR-012, NFR-SEC-04)
  * POST /api/v1/auth/refresh
  */
 const refresh = async (req, res, next) => {
   try {
+    // CSRF Mitigation (NFR-SEC-04): require custom request header
+    const customHeader = req.headers['x-requested-with'];
+    if (!customHeader) {
+      throw new AppError('CSRF protection: missing required custom request header', 403, 'CSRF_ERROR');
+    }
+
     const rawRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
     const { user, accessToken, refreshToken } = await authService.refreshSession(rawRefreshToken);
 

@@ -31,7 +31,8 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   withCredentials: true, // Send HttpOnly refresh token cookie
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
   }
 });
 
@@ -77,7 +78,12 @@ api.interceptors.response.use(
         const refreshResponse = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/auth/refresh`,
           {},
-          { withCredentials: true }
+          {
+            withCredentials: true,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          }
         );
 
         const newAccessToken = refreshResponse.data?.data?.accessToken;

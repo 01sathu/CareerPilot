@@ -2,7 +2,8 @@
 
 [![Status](https://img.shields.io/badge/Status-Phase%208%20Completed-emerald.svg)](#)
 [![Stack](https://img.shields.io/badge/Stack-React%20%7C%20Express%20%7C%20MongoDB%20%7C%20Tailwind-green.svg)](#)
-[![Tests](https://img.shields.io/badge/Tests-106%20Passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/Tests-124%20Passing-brightgreen.svg)](#)
+[![Security Audit](https://img.shields.io/badge/Security%20Audit-Verified%20%26%20Hardened-blue.svg)](docs/security/SECURITY_AUDIT_REPORT.md)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](#)
 
 > CareerPilot is a production-style full-stack career platform designed to help job seekers track applications, analyze resumes with structured AI feedback, practice mock interviews, visualize career momentum through factual analytics, and own their data through secure exports and complete account deletion.
@@ -193,7 +194,17 @@ Frontend runs on `http://localhost:5173`. Open in your browser.
 cd backend
 npm test
 ```
-All 106 integration tests across 9 test suites will execute against your MongoDB database.
+All **124 integration and security tests across 10 test suites** will execute against your MongoDB database:
+- `tests/auth.test.js` (19 tests) — Authentication, tokens, reuse detection, password reset, CSRF header checks
+- `tests/applications.test.js` (15 tests) — CRUD operations, timeline, status validation, search & pagination
+- `tests/resumes.test.js` (15 tests) — PDF validation, 5MB ceiling, 10-page limits, extraction & signed URLs
+- `tests/interview-prep.test.js` (15 tests) — Practice sessions, mock interviews, AI rate limiting & consent
+- `tests/calendar-notifications.test.js` (16 tests) — Event CRUD, conflict detection, .ics export, unread badges
+- `tests/analytics.test.js` (9 tests) — Aggregations, conversion funnels, response velocity, momentum insights
+- `tests/kanban.test.js` (7 tests) — Board column listings, status transitions, optimistic drag reordering
+- `tests/data-security.test.js` (8 tests) — CSV exports, formula injection defenses, permanent account deletion
+- `tests/security-audit.test.js` (17 tests) — BOLA/IDOR user isolation, NoSQL injection, prototype pollution, path traversal
+- `tests/health.test.js` (3 tests) — Healthcheck, database readiness, 404 handler
 
 To test the live Gemini API integration directly:
 ```bash
@@ -213,3 +224,20 @@ npm run test:gemini
 - [x] **Phase 6**: Interview Calendar & Notifications (Modules F & G, Month/Week/Agenda views, conflict detection, .ics export & notification engine)
 - [x] **Phase 7**: AI Interview Preparation (Module D, Practice & Mock modes, sample answers, 1-5 feedback rubrics, code-splitting)
 - [x] **Phase 8**: Data Management, Security Hardening and Deployment (Module H, CSV export, formula injection defense, cascading deletion, deployment manifests)
+
+---
+
+## 7. Security Audit & Hardening
+
+CareerPilot has undergone a rigorous, independent security audit and hardening process. Complete architectural threat modeling, vulnerability assessments, and remediation verifications are documented in:
+
+📘 **[CareerPilot Security Audit & Vulnerability Assessment Report](docs/security/SECURITY_AUDIT_REPORT.md)**
+
+### Core Security Guarantees:
+- **Zero Token Storage in Browser Storage**: Access tokens exist strictly in JavaScript client memory (never in `localStorage`).
+- **CSRF Defense**: Refresh tokens use `HttpOnly`, `Secure`, and `SameSite` cookies with mandatory `X-Requested-With` custom header verification.
+- **Strict BOLA/IDOR Isolation**: All data queries are scoped by verified JWT identity (`req.user.id`). Foreign resource accesses return masked 404 `NOT_FOUND` per FR-149.
+- **Injection Protections**: Multi-layered defense including Zod validation schemas, MongoDB operator stripping (`$`, `.`), and object prototype pollution filtering (`__proto__`, `constructor`, `prototype`).
+- **Storage & Upload Defense**: Validated `%PDF-` magic bytes, 5 MB file size limit, 10-page maximum, isolated UUID paths, and path traversal boundary checks.
+- **AI Safety & Privacy**: Untrusted prompt boundary demarcation (`<UNTRUSTED_...>` tags), backend-only API key isolation, user consent verification, and per-user sliding window rate limiting.
+- **Spreadsheet Formula Injection Defense**: All exported CSV cells starting with `=, +, -, @, \t, \r` are escaped with a leading single quote per RFC 4180.

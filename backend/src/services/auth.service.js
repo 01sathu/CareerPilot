@@ -193,8 +193,8 @@ const forgotPassword = async (email) => {
 
     const resetLink = `${env.CLIENT_URL}/reset-password?token=${resetToken}`;
 
-    // FR-016: In local development, print to console; in production, send via email provider
-    if (env.NODE_ENV !== 'production') {
+    // FR-016 & NFR-SEC-12: In local development, print to console; in production/test, never leak tokens to logs
+    if (env.NODE_ENV === 'development') {
       console.log(`\n======================================================`);
       console.log(`[AUTH] Password Reset Request for: ${user.email}`);
       console.log(`[AUTH] Reset Token: ${resetToken}`);

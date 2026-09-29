@@ -1,6 +1,6 @@
 const Interview = require('../models/Interview');
 const Application = require('../models/Application');
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 
 class InterviewService {
   /**

@@ -198,9 +198,20 @@ describe('Module A: Authentication & User Management Integration Tests', () => {
   describe('POST /api/v1/auth/refresh (Rotation & Reuse Detection)', () => {
     let secondRefreshToken = '';
 
+    it('rejects refresh request without custom header to mitigate CSRF (NFR-SEC-04)', async () => {
+      const res = await request(app)
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', [`refreshToken=${testRefreshToken}`]);
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe('CSRF_ERROR');
+    });
+
     it('rotates refresh token and issues new access token', async () => {
       const res = await request(app)
         .post('/api/v1/auth/refresh')
+        .set('X-Requested-With', 'XMLHttpRequest')
         .set('Cookie', [`refreshToken=${testRefreshToken}`]);
 
       expect(res.status).toBe(200);
@@ -218,6 +229,7 @@ describe('Module A: Authentication & User Management Integration Tests', () => {
       // Attempting to reuse testRefreshToken, which was already rotated
       const reuseRes = await request(app)
         .post('/api/v1/auth/refresh')
+        .set('X-Requested-With', 'XMLHttpRequest')
         .set('Cookie', [`refreshToken=${testRefreshToken}`]);
 
       expect(reuseRes.status).toBe(401);
@@ -227,6 +239,7 @@ describe('Module A: Authentication & User Management Integration Tests', () => {
       // Now verify that even secondRefreshToken has been revoked
       const invalidRes = await request(app)
         .post('/api/v1/auth/refresh')
+        .set('X-Requested-With', 'XMLHttpRequest')
         .set('Cookie', [`refreshToken=${secondRefreshToken}`]);
 
       expect(invalidRes.status).toBe(401);
@@ -340,6 +353,7 @@ describe('Module A: Authentication & User Management Integration Tests', () => {
       // Verify refresh token no longer works
       const refreshRes = await request(app)
         .post('/api/v1/auth/refresh')
+        .set('X-Requested-With', 'XMLHttpRequest')
         .set('Cookie', [`refreshToken=${testRefreshToken}`]);
 
       expect(refreshRes.status).toBe(401);

@@ -4,7 +4,7 @@ const Application = require('../models/Application');
 const storageService = require('./storage.service');
 const aiService = require('./ai.service');
 const { recordResumeAiUsage } = require('../middleware/aiRateLimiter.middleware');
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 
 /**
  * Validates PDF buffer and extracts text and page count (FR-046, FR-047, FR-049)

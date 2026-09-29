@@ -66,8 +66,14 @@ const download = async (req, res, next) => {
       token
     );
 
+    const safeFilename = (filename || 'resume.pdf')
+      .replace(/["\r\n\\]/g, '_')
+      .replace(/[^a-zA-Z0-9._ -]/g, '_');
+
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Disposition', `inline; filename="${safeFilename}"`);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'");
     return res.send(buffer);
   } catch (error) {
     next(error);

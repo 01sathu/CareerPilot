@@ -3,7 +3,7 @@ const Application = require('../models/Application');
 const Resume = require('../models/Resume');
 const aiService = require('./ai.service');
 const { recordInterviewAiUsage } = require('../middleware/aiRateLimiter.middleware');
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 
 class InterviewSessionService {
   /**

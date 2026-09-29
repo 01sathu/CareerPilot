@@ -1,6 +1,6 @@
 const { GoogleGenAI } = require('@google/genai');
 const { z } = require('zod');
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 
 // Zod Schema for General Resume Analysis (FR-054)
 const generalAnalysisOutputSchema = z.object({

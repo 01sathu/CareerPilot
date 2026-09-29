@@ -1,4 +1,4 @@
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 
 // In-memory sliding window usage tracker keyed by userId (FR-064)
 const userAiUsageMap = new Map();

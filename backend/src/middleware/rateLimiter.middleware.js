@@ -35,7 +35,23 @@ const authLimiter = rateLimit({
   }
 });
 
+/**
+ * Global API Rate Limiter (NFR-SEC-08)
+ * General rate limiter for all /api endpoints to protect against DoS/brute force.
+ */
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: env.NODE_ENV === 'test' ? 10000 : 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    res.setHeader('Retry-After', Math.ceil(options.windowMs / 1000));
+    next(new AppError('Too many requests from this IP. Please try again later.', 429, 'RATE_LIMIT_EXCEEDED'));
+  }
+});
+
 module.exports = {
   loginLimiter,
-  authLimiter
+  authLimiter,
+  globalLimiter
 };

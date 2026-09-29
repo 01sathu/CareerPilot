@@ -16,8 +16,14 @@ const sanitizeObject = (target) => {
 
   const clean = {};
   for (const key of Object.keys(target)) {
-    // If key starts with '$' or contains '.', strip it to prevent query operator injection
-    if (key.startsWith('$') || key.includes('.')) {
+    // If key starts with '$' or contains '.', or is prototype pollution key, strip it to prevent query operator injection
+    if (
+      key.startsWith('$') ||
+      key.includes('.') ||
+      key === '__proto__' ||
+      key === 'constructor' ||
+      key === 'prototype'
+    ) {
       continue;
     }
     clean[key] = sanitizeObject(target[key]);

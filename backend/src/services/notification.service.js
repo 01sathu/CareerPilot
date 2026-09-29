@@ -1,6 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 
 class NotificationService {
   /**

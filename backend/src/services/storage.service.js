@@ -96,7 +96,10 @@ class StorageService {
       }
     }
 
-    const filePath = path.join(UPLOADS_DIR, storageKey);
+    const filePath = path.resolve(UPLOADS_DIR, storageKey);
+    if (!filePath.startsWith(path.resolve(UPLOADS_DIR))) {
+      throw new AppError('Invalid storage key path', 400, 'INVALID_STORAGE_KEY');
+    }
     if (!fs.existsSync(filePath)) {
       throw new AppError('Resume file not found in storage', 404, 'FILE_NOT_FOUND');
     }
@@ -125,7 +128,10 @@ class StorageService {
       return;
     }
 
-    const filePath = path.join(UPLOADS_DIR, storageKey);
+    const filePath = path.resolve(UPLOADS_DIR, storageKey);
+    if (!filePath.startsWith(path.resolve(UPLOADS_DIR))) {
+      return;
+    }
     if (fs.existsSync(filePath)) {
       try {
         await fs.promises.unlink(filePath);
@@ -141,7 +147,10 @@ class StorageService {
    */
   async deleteUserDirectory(userId) {
     if (!userId) return;
-    const userDir = path.join(UPLOADS_DIR, String(userId));
+    const userDir = path.resolve(UPLOADS_DIR, String(userId));
+    if (!userDir.startsWith(path.resolve(UPLOADS_DIR))) {
+      return;
+    }
     if (fs.existsSync(userDir)) {
       try {
         await fs.promises.rm(userDir, { recursive: true, force: true });
@@ -198,10 +207,14 @@ class StorageService {
       .update(expectedPayload)
       .digest('hex');
 
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, 'hex'),
-      Buffer.from(expectedSignature, 'hex')
-    );
+    const sigBuf = Buffer.from(signature, 'hex');
+    const expectedBuf = Buffer.from(expectedSignature, 'hex');
+
+    if (sigBuf.length !== expectedBuf.length || sigBuf.length === 0) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(sigBuf, expectedBuf);
   }
 }
 

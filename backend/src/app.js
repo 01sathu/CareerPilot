@@ -6,6 +6,7 @@ const env = require('./config/env');
 const requestId = require('./middleware/requestId.middleware');
 const errorHandler = require('./middleware/error.middleware');
 const { mongoSanitize } = require('./middleware/mongoSanitize.middleware');
+const { globalLimiter } = require('./middleware/rateLimiter.middleware');
 const apiRoutes = require('./routes');
 const AppError = require('./utils/appError');
 
@@ -56,7 +57,7 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-Requested-With']
   })
 );
 
@@ -71,10 +72,13 @@ app.use(mongoSanitize);
 // 5. Request Correlation ID Tracing (FR-130)
 app.use(requestId);
 
-// 6. Mount API v1 Routes (FR-125)
+// 6. Global API Rate Limiter (NFR-SEC-08)
+app.use('/api', globalLimiter);
+
+// 7. Mount API v1 Routes (FR-125)
 app.use('/api/v1', apiRoutes);
 
-// 7. Handle Unknown Routes (404)
+// 8. Handle Unknown Routes (404)
 app.all('*', (req, res, next) => {
   next(new AppError(`Cannot find endpoint ${req.method} ${req.originalUrl} on this server`, 404, 'NOT_FOUND'));
 });
